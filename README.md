@@ -29,7 +29,8 @@ At the same time it forwards the stream to the **C64 visualizer** (the Ultimate 
 - Device name / mDNS as on the visualizer: **http://c64audio.local**
 
 > **Guide for all three devices together** (visualizer, audio receiver, Raspberry Pi jukebox – setup, chaining,
-> operation, illustrated; in German): [docs/Anleitung_C64-Oekosystem.pdf](docs/Anleitung_C64-Oekosystem.pdf)
+> operation, illustrated): [docs/Guide_C64-Ecosystem.pdf](docs/Guide_C64-Ecosystem.pdf) – German version:
+> [docs/Anleitung_C64-Oekosystem.pdf](docs/Anleitung_C64-Oekosystem.pdf)
 
 ## What was tested – and what was not
 
