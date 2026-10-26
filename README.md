@@ -28,6 +28,16 @@ At the same time it forwards the stream to the **C64 visualizer** (the Ultimate 
   in every other tab jumps to the matching section)
 - Device name / mDNS as on the visualizer: **http://c64audio.local**
 
+## Pictures
+
+<p>
+<img src="docs/screenshots/audio_wiedergabe.png" width="40%" alt="Web page: playback">
+<img src="docs/screenshots/audio_weiterleitung.png" width="40%" alt="Web page: sources and forwarding">
+</p>
+
+*The receiver's web page (in German): left status, start/stop, source and volume, right the Ultimates and forwarding
+to the visualizer.*
+
 > **Guide for all three devices together** (visualizer, audio receiver, Raspberry Pi jukebox – setup, chaining,
 > operation, illustrated): [docs/Guide_C64-Ecosystem.pdf](docs/Guide_C64-Ecosystem.pdf) – German version:
 > [docs/Anleitung_C64-Oekosystem.pdf](docs/Anleitung_C64-Oekosystem.pdf)

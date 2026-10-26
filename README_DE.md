@@ -29,6 +29,16 @@ Gleichzeitig reicht er den Stream an den **C64-Visualizer** weiter (der Ultimate
   geladen; „? Hilfe zu diesem Tab“ in jedem anderen Tab springt zum passenden Abschnitt)
 - Gerätename/mDNS wie beim Visualizer: **http://c64audio.local**
 
+## Bilder
+
+<p>
+<img src="docs/screenshots/audio_wiedergabe.png" width="40%" alt="Weboberfläche: Wiedergabe">
+<img src="docs/screenshots/audio_weiterleitung.png" width="40%" alt="Weboberfläche: Quellen und Weiterleitung">
+</p>
+
+*Die Weboberfläche des Empfängers: links Status, Start/Stopp, Quelle und Lautstärke, rechts Ultimate-Geräte und die
+Weiterleitung an den Visualizer.*
+
 > **Anleitung für alle drei Geräte zusammen** (Visualizer, Audio-Empfänger, Raspberry-Pi-Jukebox – Einrichtung,
 > Verkettung, Bedienung, Besonderheiten, mit Bildern): [docs/Anleitung_C64-Oekosystem.pdf](docs/Anleitung_C64-Oekosystem.pdf) –
 > englisch: [docs/Guide_C64-Ecosystem.pdf](docs/Guide_C64-Ecosystem.pdf)
