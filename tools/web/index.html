@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang=de><head><meta charset=utf-8><link rel=icon href="data:,">
+<meta name=viewport content='width=device-width,initial-scale=1'>
+<title>C64 Audio</title><style>
+body{margin:0;background:#352879;color:#c9c2f5;font:16px/1.45 system-ui,sans-serif}
+main{max-width:820px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:6px 0 14px;color:#fff}h3{font-size:14px;margin:12px 0 6px;color:#fff;font-weight:600}
+.card{background:#241b5c;padding:14px;border-radius:6px;margin-bottom:10px}
+button{font:inherit;font-weight:700;background:#b7aff0;color:#241b5c;border:0;padding:9px 12px;margin:3px 5px 3px 0;cursor:pointer;border-radius:3px}
+button:active{background:#fff}button.sec{background:#5a4fa8;color:#fff}button.big{padding:12px 20px;font-size:18px}
+input[type=text],input[type=password],input[type=number],select{font:inherit;padding:7px;background:#120e2e;color:#fff;border:1px solid #6c5eb5;box-sizing:border-box}
+input.w{width:100%}label{display:block;margin:10px 0 4px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+#st div{margin:2px 0}b{color:#fff}.ok{color:#9f9}.warn{color:#f0a0a0}#msg{min-height:1.4em;margin-top:10px;color:#f0e68c}
+.hint{font-size:13px;color:#9a90dc}.hide{display:none}.off{display:none!important}button.small{padding:5px 9px;font-size:14px}
+#scanres div{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0}
+.wizmark{outline:2px solid #f0e68c;outline-offset:2px}#wizbanner{border:2px solid #f0e68c;color:#fff}
+#devlist .dev{padding:6px 0;border-top:1px solid #4a3f9a;font-size:14px}#devlist .dev:first-child{border:0}#devlist a{color:#fff;font-weight:700}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:16px 0 8px;border-bottom:2px solid #6c5eb5}
+nav.tabs button{background:transparent;color:#c9c2f5;border-radius:4px 4px 0 0;margin:0;padding:9px 12px}
+nav.tabs button[aria-selected=true]{background:#6c5eb5;color:#fff}
+table.u{width:100%;border-collapse:collapse}table.u td{padding:3px 4px 3px 0;vertical-align:top}table.u input{width:100%}
+table.s{border-collapse:collapse;font-size:14px}table.s td{padding:1px 14px 1px 0}table.s td:nth-child(2){text-align:right;color:#fff;font-weight:600}
+.bar{height:10px;background:#120e2e;border-radius:5px;overflow:hidden;margin-top:4px;position:relative}
+.bar i{display:block;height:100%;background:#9f9}.bar s{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff}
+.hl{text-align:right;font-size:13px;margin:0 0 4px}.hl a,#helpbody a{color:#b7aff0}
+#helpbody{line-height:1.5}#helpbody h2{margin:28px 0 8px;padding-top:6px;border-top:1px solid #4a3f9a;font-size:18px;color:#fff}#helpbody h2.htitle{margin-top:0;border:0}
+#helpbody h3{font-size:15px;margin:18px 0 6px}#helpbody p,#helpbody ul,#helpbody ol{margin:6px 0}#helpbody li{margin:2px 0}
+.tw{overflow-x:auto;margin:8px 0}#helpbody table{border-collapse:collapse;font-size:14px;width:100%}
+#helpbody th,#helpbody td{border:1px solid #4a3f9a;padding:4px 7px;text-align:left;vertical-align:top}#helpbody th{background:#2c2370;color:#fff}
+#helpbody code{font:13px ui-monospace,monospace;background:#120e2e;color:#e8e4ff;padding:1px 4px;border-radius:3px}
+#helpbody pre{background:#120e2e;color:#e8e4ff;padding:8px;overflow-x:auto;font:13px/1.4 ui-monospace,monospace}
+.htoc{background:#2c2370;padding:8px 12px;border-radius:4px}.htoc ol{columns:2;margin:4px 0;padding-left:22px}
+@media(max-width:520px){.htoc ol{columns:1}}
+</style></head><body><main>
+<h1>**** C64 AUDIO-EMPF&Auml;NGER ****</h1>
+<div class=card id=st>Lade Status ...</div>
+<nav class=tabs role=tablist>
+<button data-t=play role=tab>Wiedergabe</button><button data-t=set role=tab>Einstellungen</button><button data-t=sys role=tab>System</button><button data-t=help role=tab>Hilfe</button></nav>
+
+<section data-tab=play>
+<div class=hl><a href='#h-tab-wiedergabe' onclick="return help('tab-wiedergabe')">? Hilfe zu diesem Tab</a></div>
+<div class=card>
+<div class=row style='margin-top:0'><button class=big onclick="cmd('play')">&#9654; Start</button><button class='big sec' onclick="cmd('stop')">&#9632; Stopp</button></div>
+<div class=row><label for=src style='margin:0'>Quelle:</label><select id=src style='flex:1;min-width:180px'></select></div>
+<div class=row><label for=vol style='margin:0'>Lautst&auml;rke:</label>
+<input type=range id=vol min=0 max=100 step=1 value=80 style='flex:1;min-width:140px'><b id=volv style='min-width:52px;text-align:right'>&ndash;</b></div>
+<div class=hint style='margin-top:8px'>Der optionale Taster am Pico macht dasselbe: kurz = Start/Stopp, 1&nbsp;s halten = n&auml;chste Quelle.
+Lautst&auml;rke, Quelle und Start/Stopp bleiben nach dem Ausschalten erhalten.</div></div>
+<div class=card><h3 style='margin-top:0'>Puffer und Takt</h3>
+<div id=buf class=hint></div><div class=bar><i id=bari style='width:0'></i><s id=bars></s></div>
+<table class=s style='margin-top:10px' id=stats></table>
+<div class=row><button class=sec onclick="cmd('reset')">Z&auml;hler zur&uuml;cksetzen</button></div>
+<div class=hint>Verloren = kam nie oder zu sp&auml;t (wird durch Wiederholen des vorigen Pakets &uuml;berbr&uuml;ckt, kein Knacken).
+Leergelaufen = l&auml;ngere WLAN-L&uuml;cke als der Puffer &ndash; dann hilft ein gr&ouml;&szlig;erer Puffer unter &bdquo;Einstellungen&ldquo;.</div></div>
+<div class=card><h3 style='margin-top:0'>Ger&auml;te im Netz</h3>
+<div id=devchain class=hint></div><div id=devlist>Suche &hellip;</div>
+<div class=row><button class='sec small' onclick=devQuery()>Neu suchen</button>
+<a href='#h-geraete-im-netz' onclick="return help('geraete-im-netz')" class=hint style='color:#b7aff0'>Was steht hier?</a></div></div>
+</section>
+
+<section data-tab=set>
+<div class=hl><a href='#h-tab-einstellungen' onclick="return help('tab-einstellungen')">? Hilfe zu diesem Tab</a></div>
+<div class=card id=wizbanner style='display:none'></div>
+<div class=card>
+<label>Ger&auml;tename (erreichbar als <b id=devurl>c64audio.local</b>)</label><input type=text class=w id=devname maxlength=16 placeholder=c64audio autocapitalize=off autocomplete=off spellcheck=false>
+<div id=devwarn class='hint warn' style='display:none'></div>
+<label>WLAN-Name (2,4 GHz)</label><input type=text class=w id=ssid>
+<label>WLAN-Passwort (leer lassen = unver&auml;ndert)</label><input type=password class=w id=pass autocomplete=new-password>
+<h3>Ultimate-Ger&auml;te (Quellen)</h3>
+<div class=hint>Adresse: IP (z.&nbsp;B. 192.168.1.64) oder Name. Passwort = Netzwerk-Passwort des Ultimate, leer = unver&auml;ndert.
+Den Audio-Stream senden die Ultimates nur &uuml;ber <b>Ethernet</b> &ndash; deshalb die Ethernet-Adresse eintragen (die Suche nimmt sie automatisch).</div>
+<table class=u id=u64t></table>
+<div class=row><button class=sec onclick=scanStart() id=scanbtn>Netzwerk nach Ultimates durchsuchen</button><span id=scanst class=hint></span></div>
+<div class=hint>Die Suche fragt jede Adresse im Heimnetz und dauert gut eine Minute; der Ton kann dabei kurz aussetzen.</div>
+<div id=scanres></div>
+<div class=row><input type=checkbox id=fed><label for=fed style='margin:0'>Stream kommt <b>weitergeleitet</b> (z.&nbsp;B. vom Raspberry Pi) &ndash; nie selbst beim Ultimate anfordern</label></div>
+<div class=hint>Haken setzen, wenn ein anderes Ger&auml;t den Stream holt und hierher weiterreicht. Sonst nimmt der Empf&auml;nger
+ihm den Stream weg, sobald dort einmal ein paar Sekunden nichts kommt (das Ultimate streamt nur an ein Ziel).
+<a href='#h-weitergeleiteter-stream' onclick="return help('weitergeleiteter-stream')">Mehr dazu</a></div>
+<h3>Weiterleitung an den Visualizer</h3>
+<div class=row style='margin-top:0'><input type=checkbox id=fwdon><label for=fwdon style='margin:0'>Jedes Paket unver&auml;ndert weiterreichen an:</label></div>
+<input type=text class=w id=fwd placeholder='c64viz.local oder 192.168.1.50' autocapitalize=off spellcheck=false style='margin-top:6px'>
+<label>Passwort der Visualizer-Webseite (leer = unver&auml;ndert)</label>
+<div class=row style='margin-top:0'><input type=password id=fwdpw maxlength=32 autocomplete=new-password style='flex:1;min-width:180px'>
+<label class=hint id=xfwdl style='margin:0;display:none;gap:4px;align-items:center'><input type=checkbox id=xfwdpw> l&ouml;schen</label></div>
+<div class=hint>Damit reicht der Empf&auml;nger die Titelmeldungen der PC-Jukebox an den Visualizer weiter (Laufschrift auf der Matrix),
+wenn in der Jukebox dieser Empf&auml;nger als Pico eingetragen ist.</div>
+<div class=hint>Der Ultimate streamt nur an <b>ein</b> Ziel. Damit der C64-Visualizer weiterl&auml;uft, bekommt er den Stream von hier.
+Beim Visualizer bleibt &bdquo;Audio-Stream vom Ultimate verwenden&ldquo; an (Unicast) &ndash; er fordert den Stream nur an, solange keine Pakete kommen.</div>
+<h3>Puffer</h3>
+<div class=row style='margin-top:0'><input type=number id=lat min=40 max=300 step=10 style='width:100px'><span>ms (40&ndash;300, Standard 80)</span></div>
+<div class=hint>Mehr Puffer &uuml;berbr&uuml;ckt l&auml;ngere WLAN-L&uuml;cken, der Ton kommt dann aber sp&auml;ter als das Bild des C64.</div>
+<label>Neues Passwort f&uuml;r diese Webseite (6&ndash;32 Zeichen, leer = unver&auml;ndert)</label><input type=password class=w id=webpw autocomplete=new-password>
+<div class=hint>Im Heimnetz fragt der Browser nach dem Passwort (Benutzername beliebig). Ab Werk: <b>commodore64</b>.
+Im eigenen WLAN des Pico (C64-Audio) ist kein Passwort n&ouml;tig. Passwort vergessen: <b>wlan_reset.uf2</b> aufspielen.</div>
+<div class=row><button onclick=saveCfg()>Speichern und neu starten</button></div></div>
+</section>
+
+<section data-tab=sys>
+<div class=hl><a href='#h-tab-system' onclick="return help('tab-system')">? Hilfe zu diesem Tab</a></div>
+<div class=card><h3 style='margin-top:0'>Firmware-Update</h3>
+<div class=hint>Neue Firmware ohne USB-Kabel aufspielen: <b>c64audio.uf2</b> ausw&auml;hlen. Einstellungen bleiben erhalten.
+Die Wiedergabe h&auml;lt dabei an. Der Pico pr&uuml;ft die Datei, bevor er sie &uuml;bernimmt; w&auml;hrend des Aufspielens (ca. 10&nbsp;s) nicht den Strom trennen.
+Geht doch etwas schief, startet er im USB-Laufwerksmodus &ndash; dann die .uf2 per USB kopieren.</div>
+<div id=fwcur class=hint style='margin-top:6px'></div>
+<div class=row><button class=sec onclick="$('fwfile').click()">Firmware (.uf2) w&auml;hlen &hellip;</button></div>
+<input type=file id=fwfile accept=.uf2 style='display:none'>
+<div id=fwmsg class=hint style='margin-top:6px'></div></div>
+<div class=card><h3 style='margin-top:0'>Sicherung</h3>
+<div class=hint>Alle Einstellungen in einer Datei: WLAN, Webseiten-Passwort, Ger&auml;tename, die Ultimate-Ger&auml;te, Weiterleitung, Puffer,
+Lautst&auml;rke und Quelle. Praktisch vor einem Wechsel der Firmware oder f&uuml;r einen zweiten Empf&auml;nger.
+<b>Die Datei enth&auml;lt Passw&ouml;rter</b> (WLAN, Ultimate, Visualizer) &ndash; sicher aufbewahren.</div>
+<div class=row><button class=sec onclick=bkSave()>Sicherung herunterladen</button>
+<button class=sec onclick="$('bkfile').click()">Sicherung einspielen &hellip;</button></div>
+<input type=file id=bkfile accept='.json,application/json' style='display:none'>
+<div id=bkmsg class=hint style='margin-top:6px'></div></div>
+<div class=card><h3 style='margin-top:0'>Diagnose</h3>
+<div class=hint>Protokoll des Pico (WLAN, Ultimate, Stream) &ndash; dieselbe Ausgabe wie &uuml;ber USB-Seriell (Debug-Firmware).</div>
+<div class=row><button class=sec onclick=loadDiag()>Diagnose laden</button></div>
+<pre id=diagout style='max-height:300px;overflow:auto;font-size:12px;white-space:pre-wrap;margin-top:6px'></pre></div>
+</section>
+
+<section data-tab=help><div class=card id=helpbody></div></section>
+<div id=msg></div></main><script>
+const $=i=>document.getElementById(i);
+const HE=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const N=4;
+function msg(t){$('msg').textContent=t}
+function tab(t,keep){document.querySelectorAll('section[data-tab]').forEach(s=>s.classList.toggle('off',s.dataset.tab!=t));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t==t));
+  if(t=='help')loadHelp();
+  if(t=='play'&&!keep)devLoad();
+  if(!keep)try{localStorage.setItem('c64audiotab',t)}catch(e){}}
+/* the manual (docs/HANDBUCH.md): fetched from the Pico (/hilfe, gzip) the first time the tab opens */
+let HELP=null;
+function loadHelp(){if(!HELP)HELP=fetch('/hilfe').then(r=>{if(!r.ok)throw r.status;return r.text()})
+  .then(t=>{$('helpbody').innerHTML=t}).catch(()=>{HELP=null;$('helpbody').textContent='Die Hilfe konnte nicht geladen werden \u2013 Tab erneut \u00f6ffnen.'});
+  return HELP}
+function help(id){tab('help');loadHelp().then(()=>{const e=$('h-'+id);if(e)e.scrollIntoView()});return false}
+$('helpbody').addEventListener('click',e=>{const a=e.target.closest('a[data-h]');if(!a)return;e.preventDefault();
+  const t=$('h-'+a.dataset.h);if(t)t.scrollIntoView()});
+document.querySelector('nav.tabs').onclick=e=>{const b=e.target.closest('button[data-t]');if(b)tab(b.dataset.t)};
+{let t='play';try{t=localStorage.getItem('c64audiotab')||'play'}catch(e){}tab(t,1)}
+/* Ultimate rows */
+$('u64t').innerHTML='<tr class=hint><td>Name</td><td>Adresse</td><td>Passwort</td></tr>'+[...Array(N).keys()].map(i=>
+  `<tr><td style='width:22%'><input type=text id=l${i} maxlength=16 placeholder='Ultimate ${i+1}'></td>`+
+  `<td><input type=text id=a${i} maxlength=63 autocapitalize=off spellcheck=false placeholder='${i?'':'192.168.1.64'}'></td>`+
+  `<td style='width:26%'><input type=password id=p${i} maxlength=32 autocomplete=new-password><label class=hint style='margin:2px 0 0;display:none;gap:4px;align-items:center' id=xl${i}><input type=checkbox id=x${i}> l&ouml;schen</label></td></tr>`).join('');
+
+function cmd(c){return fetch('/cmd?c='+c,{method:'POST'}).then(r=>r.text()).then(t=>{if(t!='OK')msg(t)}).catch(()=>msg('Keine Verbindung'))}
+/* volume: shows the Pico's value, sends while dragging (at most every 250 ms) and when released */
+const VOL={busy:0,sent:0,timer:0};
+function volSend(){clearTimeout(VOL.timer);VOL.sent=Date.now();cmd('vol&v='+$('vol').value)}
+$('vol').addEventListener('input',()=>{VOL.busy=Date.now();$('volv').textContent=$('vol').value+' %';
+  if(Date.now()-VOL.sent>=250)volSend();else{clearTimeout(VOL.timer);VOL.timer=setTimeout(volSend,250)}});
+$('vol').addEventListener('change',()=>{VOL.busy=Date.now();volSend()});
+$('src').addEventListener('change',()=>cmd('src&i='+$('src').value));
+
+const fmt=(v,d)=>Number(v).toFixed(d).replace('.',',');
+function stat(){return fetch('/status').then(r=>r.json()).then(s=>{
+  const want=(s.cfgname||'c64audio'),cur=s.u64list[s.src]||{};
+  const stName={spielt:'spielt',puffert:'füllt den Puffer',aus:'aus'}[s.state]||s.state;
+  $('st').innerHTML='<div>WLAN: <b>'+HE(s.wifi)+'</b> &ndash; IP <b>'+HE(s.ip)+'</b>'
+   +(s.name&&s.sta?' &ndash; <b>'+HE(s.name)+'.local</b>'+(s.name!=want?' <span style="color:#f0e68c">(„'+HE(want)+'“ ist im Netz schon vergeben)</span>':''):'')+'</div>'
+   +'<div>Wiedergabe: <b class='+(s.state=='spielt'?'ok':'')+'>'+(s.play?stName:'gestoppt')+'</b>'
+   +(cur.addr?' &ndash; Quelle <b>'+HE(cur.label||cur.addr)+'</b>':' &ndash; <span class=warn>kein Ultimate eingetragen (Einstellungen)</span>')+'</div>'
+   +'<div>Ultimate: <b>'+HE(s.u64state)+'</b></div>'
+   +'<div>Stream: '+(s.rx?'<b class=ok>'+s.pps+' Pakete/s</b> von <b>'+HE(s.from)+'</b>'+(s.direct?' (direkt)':' (weitergeleitet)'):'<b>kommt nicht an</b>')+'</div>'
+   +(s.fwd_on?'<div>Weiterleitung an <b>'+HE(s.fwd)+'</b>'+(s.fwdip!='-'?' ('+HE(s.fwdip)+')':' <span class=warn>(Adresse noch nicht gefunden)</span>')+': <b>'+s.fpps+' Pakete/s</b>'+(s.fwderr?' <span class=warn>'+s.fwderr+' Fehler</span>':'')+'</div>':'')
+   +(s.np?'<div>L&auml;uft: <b>'+HE(s.np)+'</b></div>':'')
+   +(s.npr?'<div>Titel an den Visualizer: <b'+(s.npr=='\u00fcbergeben'||s.npr.startsWith('gesendet')?' class=ok':' class=warn')+'>'+HE(s.npr)+'</b> ('+s.nprsent+' &uuml;bergeben)</div>':'')
+   +(s.contested?'<div class=warn>&#9888; Ein anderes Ger&auml;t fordert den Stream immer wieder an (Visualizer oder PC-Jukebox?). Weiterleitung einrichten &ndash; siehe Anleitung. Neuer Versuch alle 60 s.</div>':'')
+   +(s.pwdefault?'<div style="color:#f0e68c">Die Webseite nutzt noch das Standardpasswort &ndash; bitte unter „Einstellungen“ ein eigenes vergeben.</div>':'');
+  /* sources */
+  const opts=s.u64list.map((u,i)=>u.addr?`<option value=${i}>${HE(u.label||('Ultimate '+(i+1)))} (${HE(u.addr)})</option>`:'').join('');
+  if($('src').dataset.o!=opts){$('src').innerHTML=opts||'<option>(keine eingetragen)</option>';$('src').dataset.o=opts}
+  if(document.activeElement!=$('src'))$('src').value=s.src;
+  if(Date.now()-VOL.busy>3000){$('vol').value=s.vol;$('volv').textContent=s.vol+' %'}
+  /* buffer */
+  $('buf').innerHTML='Puffer <b>'+fmt(s.fill,0)+'&nbsp;ms</b> (Ziel '+s.target+'&nbsp;ms + 4&nbsp;ms DAC) &ndash; Takt <b>'+fmt(s.rate,1)+'&nbsp;Hz</b> ('+(s.ppm>0?'+':'')+fmt(s.ppm,0)+'&nbsp;ppm)';
+  const mx=Math.max(2*s.target,100);$('bari').style.width=Math.min(100,s.fill*100/mx)+'%';$('bars').style.left=Math.min(100,(s.target+4)*100/mx)+'%';
+  const rows=[['Verloren (&uuml;berbr&uuml;ckt)',s.missing],['Zu sp&auml;t gekommen',s.late],['Doppelt',s.dup],['Leergelaufen',s.underruns],
+    ['Pakete wiederholt',s.concealed],['Pakete still',s.silent],['Pakete verworfen (zu voll)',s.skipped],['Neustarts (Sequenzsprung)',s.restarts],
+    ['Puffer neu gef&uuml;llt',s.prefills],['Fremde Quelle abgewiesen',s.rejected],['Stream von anderem Ger&auml;t &uuml;bernommen',s.taken]];
+  if(s.qdrop||s.behind)rows.push(['Interne Engp&auml;sse',s.qdrop+' / '+s.behind]);
+  $('stats').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('');
+  if(s.build)$('fwcur').innerHTML='Laufende Firmware: <b>'+HE(s.build)+'</b>';
+  if(!stat.done){
+    $('devname').value=s.cfgname||'';devCheck();$('ssid').value=s.ssid;$('fwdon').checked=s.fwd_on;$('fed').checked=!!s.fed;$('fwd').value=s.fwd;$('lat').value=s.lat;
+    $('fwdpw').placeholder=s.fwdpw?'(gesetzt)':'';$('xfwdl').style.display=s.fwdpw?'flex':'none';
+    s.u64list.forEach((u,i)=>{if(i>=N)return;$('l'+i).value=u.label;$('a'+i).value=u.addr;$('p'+i).placeholder=u.pw?'(gesetzt)':'';$('xl'+i).style.display=u.pw?'flex':'none'});
+    stat.done=1;if(SETUP){applySetup(SETUP,s);SETUP=null}}}).catch(()=>{})}
+/* network search: the Pico asks every address of the home network for /v1/info (~70 s); a hit can be taken into the first free row */
+function scanStart(){$('scanres').innerHTML='';fetch('/u64/scan',{method:'POST'}).then(r=>r.ok?r.json():r.text().then(t=>{throw t}))
+  .then(r=>{scanShow.ran=1;scanShow(r)}).catch(e=>msg(typeof e=='string'?e:'Keine Verbindung'))}
+function scanShow(r){scanShow.list=r.found;$('scanbtn').disabled=r.running;
+  $('scanst').textContent=r.running?'suche ... '+Math.round(r.done*100/r.total)+' %':(scanShow.ran?(r.found.length?r.found.length+' gefunden':'kein Ultimate gefunden'):'');
+  const have=[...Array(N).keys()].map(i=>$('a'+i).value.trim()),LK={eth:' (Ethernet)',wlan:' (WLAN)'};
+  $('scanres').innerHTML=r.found.map((f,k)=>`<div><b>${HE(f.name||f.product)}</b><span class=hint>${HE(f.product)} &ndash; ${HE(f.ip)}${LK[f.link]||''}`
+    +(f.alt?` &middot; auch unter ${HE(f.alt)}`:'')+'</span>'
+    +(f.link=='wlan'?'<span class=warn style="font-size:13px">nur per WLAN gefunden &ndash; der Stream kommt nur &uuml;ber Ethernet</span>':'')
+    +(have.includes(f.ip)||(f.alt&&have.includes(f.alt))?'<span class=hint>(eingetragen)</span>':`<button class='sec small' onclick=scanTake(${k})>&uuml;bernehmen</button>`)+'</div>').join('');
+  if(r.running)setTimeout(()=>fetch('/u64/scan').then(x=>x.json()).then(scanShow).catch(()=>setTimeout(()=>scanShow(r),1500)),700)}
+function scanTake(k){const f=scanShow.list[k],i=[...Array(N).keys()].find(i=>!$('a'+i).value.trim());
+  if(i===undefined){msg('Alle vier Plätze sind belegt – erst einen leeren.');return}
+  $('a'+i).value=f.ip;if(!$('l'+i).value.trim())$('l'+i).value=(f.name||f.product).slice(0,16);
+  scanShow({running:false,done:254,total:254,found:scanShow.list});msg('Übernommen als Ultimate '+(i+1)+' – zum Speichern unten „Speichern und neu starten“.')}
+function devOk(v){return v==''||/^[a-z0-9]([a-z0-9-]{0,14}[a-z0-9])?$/.test(v)}
+function devCheck(){const v=$('devname').value.trim().toLowerCase(),ok=devOk(v);$('devurl').textContent=(v||'c64audio')+'.local';
+  $('devwarn').style.display=ok?'none':'';$('devwarn').textContent=ok?'':'⚠ Nur a–z, 0–9 und Bindestrich, 1–16 Zeichen, nicht mit Bindestrich am Anfang oder Ende.';return ok}
+$('devname').addEventListener('input',devCheck);
+/* #setup=<json> from the setup assistant of a visualizer: fill in the settings tab, mark what changed, the user saves
+   (with this receiver's password). Saving also makes the Ultimate the source and switches playing on, so the beacon
+   shows st 1, fw = the wanted target, src = the Ultimate - what the assistant checks. */
+let SETUP=null,SETUP_SRC=null,SETUP_PLAY=false;
+try{const m=location.hash.match(/^#setup=(.+)$/);if(m){SETUP=JSON.parse(decodeURIComponent(m[1]));history.replaceState(null,'',location.pathname)}}catch(e){SETUP=null}
+function applySetup(w,s){if(!w||typeof w!='object')return;tab('set',1);
+  document.querySelectorAll('.wizmark').forEach(e=>e.classList.remove('wizmark'));
+  const mark=(id,ch)=>{if(ch)$(id).classList.add('wizmark')},fwd=String(w.fwd||'').trim(),u=String(w.u64||'').trim();
+  mark('fwdon',$('fwdon').checked!=!!fwd);$('fwdon').checked=!!fwd;
+  if(fwd){mark('fwd',$('fwd').value.trim()!=fwd);$('fwd').value=fwd}
+  if(u){let k=-1;for(let i=0;i<N;i++)if($('a'+i).value.trim()==u)k=i;
+    if(k<0)for(let i=0;i<N;i++)if(!$('a'+i).value.trim()){k=i;break}
+    if(k<0)k=N-1;
+    if($('a'+k).value.trim()!=u){if($('a'+k).value.trim()&&$('xl'+k).style.display!='none')$('x'+k).checked=true;   /* another Ultimate's password */
+      $('a'+k).value=u;$('l'+k).value=String(w.u64l||'').slice(0,16);$('p'+k).value='';mark('a'+k,1);mark('l'+k,1)}
+    if(s.src!=k)mark('a'+k,1);SETUP_SRC=k;SETUP_PLAY=!!w.stream}
+  const bn=$('wizbanner');bn.style.display='';
+  bn.innerHTML='<b>Vom Einricht-Assistenten'+(w.by?' (auf '+HE(w.by)+')':'')+' vorbereitet.</b> Die gelb markierten Felder sind neu eingetragen'
+    +(fwd?' &ndash; der Empf&auml;nger reicht den Ton an <b>'+HE(fwd)+'</b> weiter':' &ndash; keine Weiterleitung (letztes Ger&auml;t der Kette)')+'. '
+    +(SETUP_SRC!==null?'Beim Speichern wird <b>'+HE($('l'+SETUP_SRC).value||('Ultimate '+(SETUP_SRC+1)))+' ('+HE(u)+')</b> die Quelle'+(s.play||!w.stream?'':' und die Wiedergabe eingeschaltet')+'. ':'')
+    +'Bitte pr&uuml;fen und unten <b>&bdquo;Speichern und neu starten&ldquo;</b> dr&uuml;cken.';
+  bn.scrollIntoView()}
+function saveCfg(){if(!stat.done){msg('Einstellungen noch nicht vom Pico geladen – gleich nochmal versuchen.');return}
+  if(!devCheck()){msg('Gerätename ungültig');return}
+  const lat=+$('lat').value;if(!(lat>=40&&lat<=300)){msg('Puffer: 40 bis 300 ms.');return}
+  if($('webpw').value&&($('webpw').value.length<6||$('webpw').value.length>32)){msg('Das Passwort für die Webseite muss 6 bis 32 Zeichen lang sein.');return}
+  const f={name:$('devname').value.trim().toLowerCase(),ssid:$('ssid').value,pass:$('pass').value,fwd_on:$('fwdon').checked?'1':'0',fed:$('fed').checked?'1':'0',fwd:$('fwd').value.trim(),lat:String(lat),webpw:$('webpw').value,
+    fwdpw:$('fwdpw').value,xfwdpw:$('xfwdpw').checked?'1':'0'};
+  for(let i=0;i<N;i++){f['l'+i]=$('l'+i).value.trim();f['a'+i]=$('a'+i).value.trim();f['p'+i]=$('p'+i).value;f['x'+i]=$('x'+i).checked?'1':'0'}
+  if(SETUP_SRC!==null){if(!f['a'+SETUP_SRC]){msg('Die Quelle vom Einricht-Assistenten (Ultimate '+(SETUP_SRC+1)+') hat keine Adresse.');return}
+    f.src=String(SETUP_SRC);if(SETUP_PLAY)f.play='1'}
+  if(!confirm('Einstellungen speichern? Der Pico startet danach neu und verbindet sich neu.'))return;
+  fetch('/config',{method:'POST',body:new URLSearchParams(f)}).then(r=>r.text()).then(msg).catch(()=>msg('Fehler beim Speichern'))}
+/* firmware update: .uf2 -> flat image of the RP2350 (ARM secure) blocks, checked here and again in the Pico */
+function uf2Image(buf){
+  const u=new Uint8Array(buf),dv=new DataView(buf),BASE=0x10000000,FAM=0xe48bff59,parts=[];let end=0;
+  for(let o=0;o+512<=u.length;o+=512){
+    if(dv.getUint32(o,true)!=0x0A324655||dv.getUint32(o+4,true)!=0x9E5D5157||dv.getUint32(o+508,true)!=0x0AB16F30)return {err:'keine UF2-Datei'};
+    const flags=dv.getUint32(o+8,true),addr=dv.getUint32(o+12,true),n=dv.getUint32(o+16,true);
+    if(!(flags&0x2000)||dv.getUint32(o+28,true)!=FAM)continue;
+    if(addr<BASE||n>476)return {err:'unerwartete Adresse in der UF2-Datei'};
+    parts.push([addr-BASE,u.subarray(o+32,o+32+n)]);end=Math.max(end,addr-BASE+n)}
+  if(!parts.length)return {err:'keine Firmware für den RP2350 (Pico 2) in der Datei'};
+  const img=new Uint8Array(end).fill(0xFF);for(const [a,d] of parts)img.set(d,a);return {img}}
+function fnvHex(u){let h=0x811c9dc5;for(let i=0;i<u.length;i++){h^=u[i];h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,'0')}
+const hasText=(u,t)=>{const b=[...t].map(c=>c.charCodeAt(0));outer:for(let i=0;i+b.length<=u.length;i++){if(u[i]!=b[0])continue;for(let k=1;k<b.length;k++)if(u[i+k]!=b[k])continue outer;return true}return false};
+async function fwState(){return (await fetch('/fw/state')).json()}
+async function fwWait(cond,ms){for(let t=0;t<ms;t+=300){const s=await fwState().catch(()=>null);if(s&&cond(s))return s;await sleep(300)}return null}
+$('fwfile').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;const m=t=>$('fwmsg').textContent=t;
+  const r=uf2Image(await f.arrayBuffer());if(r.err){m(f.name+': '+r.err);return}
+  const img=r.img,st0=await fwState().catch(()=>null);
+  if(!hasText(img,'c64audio-fw')){m(f.name+': das ist keine Firmware des C64-Audioempfängers (z. B. die des Visualizers).');return}
+  if(st0&&img.length>st0.max){m(f.name+': zu groß ('+Math.round(img.length/1024)+' KB).');return}
+  if(!confirm('Firmware „'+f.name+'“ ('+Math.round(img.length/1024)+' KB) aufspielen? Der Pico startet danach neu.'))return;
+  const hash=fnvHex(img);
+  if(!(await fetch('/fw/begin?size='+img.length,{method:'POST'})).ok){m('Pico ist beschäftigt – gleich nochmal versuchen.');return}
+  for(let o=0;o<img.length;o+=32768){
+    m('Übertrage … '+Math.round(o*100/img.length)+' %');
+    const want=Math.min(o+32768,img.length);let ok=false;
+    for(let t=0;t<30&&!ok;t++){
+      if(t){const st=await fwState().catch(()=>null);if(st&&st.state=='error'){m('Abgelehnt: '+st.msg);return}if(st&&st.got>=want){ok=true;break}}
+      const q=await fetch('/fw/chunk?off='+o,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:img.slice(o,o+32768)}).catch(()=>null);ok=!!(q&&q.ok);if(!ok)await sleep(300)}
+    if(!ok){m('Übertragung abgebrochen – bitte nochmal versuchen.');return}
+    const w=await fwWait(s=>s.got>=want||s.state=='error',20000);
+    if(!w){m('Pico antwortet nicht.');return}
+    if(w.state=='error'){m('Abgelehnt: '+w.msg);return}}
+  m('Prüfe …');if(!await fetch('/fw/end?hash='+hash,{method:'POST'}).catch(()=>null)){m('Keine Verbindung – bitte nochmal versuchen.');return}
+  const s=await fwWait(s=>s.state=='ready'||s.state=='error',20000);
+  if(!s||s.state!='ready'){m('Abgelehnt: '+(s?s.msg:'keine Antwort'));return}
+  await fetch('/fw/apply',{method:'POST'}).catch(()=>null);m('Firmware wird aufgespielt – der Pico startet neu …');
+  const old=st0?st0.build:'';await sleep(6000);
+  for(let t=0;t<40;t++){const n=await fwState().catch(()=>null);if(n&&n.state=='idle'){m('Fertig – läuft jetzt mit der Firmware vom '+n.build+(n.build==old?' (gleicher Stand wie vorher)':'')+'.');stat();return}await sleep(1500)}
+  m('Der Pico meldet sich nicht zurück. Die .uf2 per USB aufspielen (Taster beim Einstecken halten oder BOOTSEL).')};
+/* backup: the Pico's settings blocks in one JSON file; restore = checked by the Pico, then it restarts */
+function bkSave(){$('bkmsg').textContent='lese ...';
+  fetch('/backup').then(r=>{if(!r.ok)throw 0;return r.json()}).then(b=>{
+    b.date=new Date().toISOString().slice(0,19);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:'application/json'}));
+    a.download='c64audio-'+(b.name||'c64audio')+'-'+b.date.slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();
+    $('bkmsg').textContent='Gespeichert: '+a.download}).catch(()=>{$('bkmsg').textContent='Sicherung fehlgeschlagen – gleich nochmal versuchen.'})}
+$('bkfile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  f.text().then(x=>{let b;try{b=JSON.parse(x)}catch(_){b=null}
+    if(!b||b.fmt!=='c64audio-backup'||!b.netcfg){$('bkmsg').textContent=b&&b.fmt==='c64viz-backup'?'Das ist eine Sicherung des C64-Visualizers – sie gehört nicht in den Audio-Empfänger.':'Das ist keine Sicherung des C64-Audio-Empfängers.';return}
+    if(!confirm('Sicherung „'+(b.name||'?')+'“'+(b.date?' vom '+b.date.slice(0,10):'')+' einspielen?\n\nWLAN, Passwörter, Ultimate-Geräte, Weiterleitung, Puffer, Lautstärke und Quelle werden ersetzt. Der Pico startet danach neu.'))return;
+    const q=new URLSearchParams({netcfg:b.netcfg});if(b.prefs)q.set('prefs',b.prefs);q.set('reboot','1');
+    $('bkmsg').textContent='spiele ein ...';
+    fetch('/restore',{method:'POST',body:q}).then(r=>r.text().then(t=>{if(!r.ok)throw t;return t}))
+      .then(()=>{$('bkmsg').textContent='Eingespielt – der Pico startet neu. Hat die Sicherung ein anderes Webseiten-Passwort oder einen anderen Gerätenamen, gilt ab jetzt der aus der Sicherung.'})
+      .catch(e=>{$('bkmsg').textContent=typeof e=='string'?e:'Keine Verbindung'})})});
+/* devices in the network (beacons of all visualizers and receivers, GET /devices) - same card as on the visualizer */
+const HS=x=>HE(x==null?'':String(x));
+function devQuery(){fetch('/devices/query',{method:'POST'}).then(()=>setTimeout(devLoad,800)).catch(()=>msg('Keine Verbindung'))}
+function devLoad(){if(document.querySelector('section[data-tab=play]').classList.contains('off'))return Promise.resolve();
+  return fetch('/devices').then(r=>r.json()).then(devShow).catch(()=>{})}
+function devShow(r){
+  const L=(r.list||[]).map(e=>{try{const d=JSON.parse(e.j);d.self=!!e.self;d.age=e.age;return d}catch(x){return null}}).filter(d=>d&&d.ip);
+  const by={};L.forEach(d=>by[d.ip]=d);
+  const kind=d=>d.t=='audio'?'Audio-Empf&auml;nger':d.t=='viz'?'Visualizer':d.t=='pi'?'Raspberry Pi':HS(d.t||'?');
+  const who=(d,ip)=>by[ip]?HS(by[ip].n):(ip&&ip==d.src?(HS(d.srcl||'Ultimate')+' ('+HS(ip)+')'):HS(ip));
+  /* the stream's way, as a tree: whoever gets it from a device hangs under that device (a Pi feeds several) */
+  const lo=x=>String(x||'').trim().toLowerCase().replace(/\.local$/,'');
+  const walk=(d,seen)=>{seen[d.ip]=1;const kids=L.filter(x=>x.from==d.ip&&x.rx>0&&!seen[x.ip]);
+    const parts=kids.map(k=>walk(k,seen)),fw=String(d.fw||'').split(',').map(lo).filter(x=>x);
+    const miss=d.t=='pi'?fw.filter(n=>!kids.some(k=>lo(k.n)==n||k.ip==n)):(!kids.length?fw:[]);
+    miss.forEach(n=>parts.push('<span class=warn>'+HS(n)+' (bekommt nichts)</span>'));
+    return HS(d.n)+' <b>'+d.rx+'/s</b>'+(parts.length?' &rarr; '+(parts.length>1?'['+parts.join(', ')+']':parts[0]):'')};
+  const ch=L.filter(d=>d.rx>0&&!by[d.from]).map(r=>who(r,r.from)+' &rarr; '+walk(r,{}));
+  $('devchain').innerHTML=ch.length?'Weg des Tons: '+ch.join('<br>'):'Gerade flie&szlig;t kein Audio-Stream.';
+  $('devlist').innerHTML=L.map(d=>{const w=[],au=d.t=='audio';
+    let t='<div class=dev><a href="http://'+HS(d.n)+'.local/" target=_blank>'+HS(d.n)+'</a> &ndash; '+kind(d)+', '+HS(d.ip)+(d.self?' (dieses Ger&auml;t)':'')
+      +(d.b?' <span class=hint>Firmware '+HS(d.b.replace(/:\d\d$/,''))+'</span>':'')+(d.age>15?' <span class=warn>(seit '+d.age+' s still)</span>':'')+'<br>';
+    t+=d.rx>0?'Ton: Stream '+d.rx+'/s von '+who(d,d.from):au?(d.st?'wartet auf den Stream':'gestoppt'):(d.st?(d.sm==2?'wartet auf weitergeleiteten Stream':'kein Stream'):'Stream aus');
+    if(d.title)t+='<br>&#9834; '+HS(d.title);
+    if(d.fw&&(d.st||d.t!='pi')){if(!d.st&&!au)w.push('leitet nicht weiter an '+HS(d.fw)+': &bdquo;Audio-Stream verwenden&ldquo; ist aus');
+      else if(!d.fwip)w.push('Weiterleitung: '+HS(d.fw)+' wird gesucht');
+      else t+=' &rarr; leitet weiter an '+HS(d.fw)+' ('+(d.fp||0)+'/s)'}
+    if(d.wide=='lead')t+='<br>Zwei Matrizen: rechnet f&uuml;r '+HS(d.wpart)+(d.wok?' (l&auml;uft)':' <span class=warn>(Partner antwortet nicht)</span>');
+    if(d.wide=='follow')t+='<br>Zwei Matrizen: zeigt die H&auml;lfte eines anderen'+(d.wok?' (l&auml;uft)':' (wartet)');
+    return t+w.map(x=>'<br><span class=warn>&#9888; '+x+'</span>').join('')+'</div>'}).join('')||'Keine Ger&auml;te gefunden.'}
+async function loadDiag(){try{const r=await fetch('/diag');$('diagout').textContent=(await r.text())||'(leer)'}catch(e){$('diagout').textContent='Keine Verbindung'}}
+/* polling: the next round only after the previous answer (the Pico takes at most 4 connections at a time) */
+function poll(fn,ms){const run=()=>{const p=fn();Promise.resolve(p).finally(()=>setTimeout(run,ms))};run()}
+poll(stat,1000);poll(devLoad,5000);
+</script></body></html>

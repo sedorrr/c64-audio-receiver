@@ -1,0 +1,40 @@
+;
+; I2S output for the PCM5102A: 32-bit slots (64 x fs bit clock), MSB first, data one BCK after the LRCK edge.
+; out pin = DIN, side-set pins = BCK (bit 0) and LRCK (bit 1, must be the GPIO after BCK).
+; Two instructions per bit -> the state machine runs at 128 x fs. Autopull 32 bits: the DMA writes left, right, left ...
+; Data changes while BCK is low, the DAC samples on the rising edge.
+;
+.program i2s32
+.side_set 2
+                        ;        /--- LRCK
+                        ;        |/-- BCK
+loop_l:
+    out pins, 1         side 0b00
+    jmp x-- loop_l       side 0b01
+    out pins, 1         side 0b10   ; last bit of the left word, LRCK already high (I2S: one bit early)
+    set x, 30           side 0b11
+loop_r:
+    out pins, 1         side 0b10
+    jmp x-- loop_r      side 0b11
+    out pins, 1         side 0b00   ; last bit of the right word, LRCK already low
+public entry_point:
+    set x, 30           side 0b01
+
+% c-sdk {
+#include "hardware/clocks.h"
+static inline void i2s32_program_init(PIO pio, uint sm, uint offset, uint pin_din, uint pin_bck) {
+    pio_sm_config c = i2s32_program_get_default_config(offset);
+    sm_config_set_out_pins(&c, pin_din, 1);
+    sm_config_set_sideset_pins(&c, pin_bck);
+    sm_config_set_out_shift(&c, false, true, 32);        /* MSB first, autopull at 32 bits */
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    pio_sm_init(pio, sm, offset, &c);
+    uint32_t pins = (1u << pin_din) | (3u << pin_bck);
+    pio_sm_set_pindirs_with_mask(pio, sm, pins, pins);
+    pio_sm_set_pins_with_mask(pio, sm, 0, pins);
+    pio_gpio_init(pio, pin_din);
+    pio_gpio_init(pio, pin_bck);
+    pio_gpio_init(pio, pin_bck + 1);
+    pio_sm_exec(pio, sm, pio_encode_jmp(offset + i2s32_offset_entry_point));
+}
+%}
