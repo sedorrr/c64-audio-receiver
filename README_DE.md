@@ -36,7 +36,7 @@ Gleichzeitig reicht er den Stream an den **C64-Visualizer** weiter (der Ultimate
 
 | Geprüft | Noch nicht geprüft |
 |---|---|
-| Firmware baut für den Pico 2 W (Pico SDK 2.1.1) | **Klang, I2S-Timing und Pegel** – es stand noch kein PCM5102A zur Verfügung |
+| Firmware baut für den Pico 2 W (Pico SDK 2.1.1); **am echten PCM5102A:** Ton an Kopfhörer und Stereoanlage, Klang gut (Verdrahtung wie im Schaltplan) | Pegel und I2S-Timing mit Messgerät (Oszilloskop/Logikanalysator) |
 | Paketformat am echten Ultimate 64 Elite II gemessen (Sequenz little endian, 192 Frames, 47 982 Hz) | Prozessorlast des Timer-Interrupts |
 | **Am echten Pico 2 W mit dem Elite II:** Empfang 250 Pakete/s ohne Verlust, Puffer 82–84 ms, Takt rastet bei 47 982,6–47 983,0 Hz ein; Weiterleitung an den Mac 7 997 Pakete in 32 s lückenlos und in Reihenfolge, an den Visualizer (`c64viz.local`, per mDNS aufgelöst) 250 Pakete/s, der Visualizer übernimmt sie ohne Lücke und fordert den Stream nicht zurück; Start fordert den Stream an, Stopp beendet ihn; Lautstärke speichern im Betrieb ohne Aussetzer; Firmware-Update über WLAN (393 KB in 4,6 s) | |
 | Host-Tests: Jitter-Puffer Stück für Stück, die ganze Kette 4 × 10 min simuliert, Netzwerkteil mit Fakes; Weboberfläche im Browser (Playwright) | |

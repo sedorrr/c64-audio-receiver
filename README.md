@@ -35,7 +35,7 @@ At the same time it forwards the stream to the **C64 visualizer** (the Ultimate 
 
 | Tested | Not tested yet |
 |---|---|
-| Firmware builds for the Pico 2 W (Pico SDK 2.1.1) | **Sound, I2S timing and level** – no PCM5102A was available yet |
+| Firmware builds for the Pico 2 W (Pico SDK 2.1.1); **on a real PCM5102A:** sound on headphones and the stereo, sounds good (wired as in the schematic) | Level and I2S timing with a measuring device (oscilloscope/logic analyser) |
 | Packet format measured on a real Ultimate 64 Elite II (sequence little endian, 192 frames, 47 982 Hz) | CPU load of the timer interrupt |
 | **On a real Pico 2 W with the Elite II:** reception 250 packets/s without loss, buffer 82–84 ms, clock locks at 47 982.6–47 983.0 Hz; forwarding to a Mac 7 997 packets in 32 s complete and in order, to the visualizer (`c64viz.local`, resolved by mDNS) 250 packets/s, taken over without a gap, the visualizer does not ask for the stream again; start requests the stream, stop ends it; saving the volume while playing without drop-outs; firmware update over WLAN (393 KB in 4.6 s) | |
 | Host tests: jitter buffer sample by sample, the whole chain simulated 4 × 10 min, network part with fakes; web page in a browser (Playwright) | |
